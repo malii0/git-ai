@@ -1,15 +1,15 @@
-# git-ekle
+# git-ai
 
-CLI utility that generates Conventional Commits messages using Groq's fast LLM APIs and pushes to GitHub with one click.
+A fast, lightweight CLI utility that automates Git staging, generates **Conventional Commits** messages using Groq-hosted LLMs, and pushes to your remote repository with one keystroke.
 
 ## Features
 
-- Automatically stages modified files (`git add .`)
-- Extracts `git diff` and generates clean, single-line commit messages
-- Uses Groq API (`qwen/qwen3.6-27b`) for sub-second inference
-- Prompts for confirmation or custom editing before pushing
+- **Automated Staging:** Runs `git add .` to capture all workspace modifications.
+-​ **Smart Diff Analysis:** Truncates and analyzes `git diff --cached` using high-speed LLMs (`qwen/qwen3.6-27b`).
+-​ **Interactive CLI:** Accept the generated message with `Enter`, edit inline with `e`, or abort with `c`.
+- **Zero Heavy Dependencies:** Written entirely in standard Python (`urllib`, `subprocess`, `json`, `re`).
 
-## Requirements
+## Prerequisites
 
 - Python 3.8+
 - Git
@@ -17,18 +17,27 @@ CLI utility that generates Conventional Commits messages using Groq's fast LLM A
 
 ## Installation
 
-1. Copy the script to your local bin directory:
-   cp gitek.py ~/.local/bin/gitek.py
-   chmod +x ~/.local/bin/gitek.py
+- Copy `git-ai.py` to your local binary directory:
+  ```bash
+  mkdir -p ~/.local/bin
+  cp git-ai.py ~/.local/bin/git-ai.py
+  chmod +x ~/.local/bin/git-ai.py
+  ```
 
-2. Register the Git alias:
-   git config --global alias.ekle '!python3 ~/.local/bin/gitek.py'
+- Register the Git alias:
+  ```bash
+  git config --global alias.ai '!python3 ~/.local/bin/git-ai.py'
+  ```
 
-3. Add your Groq API key to your shell config (~/.bashrc or ~/.zshrc):
-   export GROQ_API_KEY="gsk_your_api_key_here"
+- Export your Groq API key in your ~/.bashrc or ~/.zshrc:
+  ```bash
+  export GROQ_API_KEY="gsk_your_api_key_here"
+  ```
 
 ## Usage
 
-Run the command inside any Git repository:
-git ekle
+Simply run inside any Git repository:
 
+```bash
+git ai
+```
