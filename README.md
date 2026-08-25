@@ -1,51 +1,51 @@
 # komit
 
-A fast, lightweight CLI utility that automates Git staging, generates **Conventional Commits** messages using Groq-hosted LLMs, and pushes to your remote repository with one keystroke.
+A CLI tool that stages your changes, asks a Groq-hosted LLM to write a Conventional Commits message from the diff, and pushes. One command instead of add, commit, push.
 
-## Features
+## What it does
 
-- **Automated Staging:** Runs `git add .` to capture all workspace modifications.
-- **Smart Diff Analysis:** Truncates and analyzes `git diff --cached` using a high-speed LLM (`qwen/qwen3.6-27b`, a Groq preview model — subject to change).
-- **Interactive CLI:** Accept the generated message with `Enter`, edit inline with `e`, or abort with `c`.
-- **Zero Heavy Dependencies:** Written entirely in standard Python (`urllib`, `subprocess`, `json`, `re`).
+Runs `git add .`, then `git diff --cached`, sends the diff to Groq (`qwen/qwen3.6-27b`, currently a preview model there, so it may change or disappear), and shows you the suggested commit message. Press enter to accept it, `e` to write your own, or `c` to cancel. On accept, it commits and pushes.
 
-> ⚠️ **Note:** `komit` runs `git add .` before generating the commit message, which stages *everything* in your working tree — including `.env` files or other secrets if they aren't already covered by `.gitignore`. Make sure your `.gitignore` is in order before using it.
+No dependencies beyond the Python standard library: `urllib`, `subprocess`, `json`, `re`.
 
-## Prerequisites
+Note: `git add .` stages everything in the working tree, including `.env` files or anything else not already covered by `.gitignore`. Check your `.gitignore` before running this.
 
-- Python 3.8+- Git
-- Free [Groq API Key](https://console.groq.com)
+## Requirements
 
-## Installation
+- Python 3.8+
+- Git
+- A free Groq API key: https://console.groq.com
 
-Copy `komit.py` to your local binary directory as `komit` (no extension, so it works as a plain command):
+## Install
 
-```bash
+Copy `komit.py` into your local bin as `komit` (no extension):
+
+```
 mkdir -p ~/.local/bin
 cp komit.py ~/.local/bin/komit
 chmod +x ~/.local/bin/komit
 ```
 
-Make sure ~/.local/bin is on your `PATH` (add this to your ~/.bashrc or ~/.zshrc if it isn't already):
+Add `~/.local/bin` to your `PATH` if it isn't already, in `~/.bashrc` or `~/.zshrc`:
 
-```bash
+```
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Export your Groq API key in your ~/.bashrc or ~/.zshrc:
+Set your Groq API key the same way:
 
-```bash
-export GROQ_API_KEY]="gsk_your_api_key_here"
+```
+export GROQ_API_KEY="gsk_your_api_key_here"
 ```
 
 ## Usage
 
-Simply run inside any Git repository:
+From inside any git repo:
 
-```bash
+```
 komit
 ```
 
-## Security
+## Security note
 
-Commit messages are passed to Git via an argument list (`subprocess.run([...])`), not through a shell string, so user- or model-generated text in the commit message can't be interpreted as shell commands.
+Commit messages go to git as an argument list (`subprocess.run([...])`), not interpolated into a shell string. Text from the model or from your own edits can't be read as shell commands.
