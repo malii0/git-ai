@@ -1,24 +1,27 @@
 # komit
 
-A CLI tool that stages your changes, asks a Groq-hosted LLM to write a Conventional Commits message from the diff, and pushes. One command instead of add, commit, push.
+A command-line tool that stages your changes, asks a Groq-hosted LLM to write a Conventional Commits message for the diff, then commits and pushes. One keystroke instead of typing `git add`, `git commit -m "..."`, and `git push` separately.
 
-## What it does
+## Features
 
-Runs `git add .`, then `git diff --cached`, sends the diff to Groq (`qwen/qwen3.6-27b`, currently a preview model there, so it may change or disappear), and shows you the suggested commit message. Press enter to accept it, `e` to write your own, or `c` to cancel. On accept, it commits and pushes.
+- Stages everything with `git add .` before generating a message.
+- Sends the staged diff to a fast Groq model (`qwen/qwen3.6-27b` by default) and asks for a single-line Conventional Commits message.
+- Checks staged files against common secret patterns (`.env`, `.pem`, `id_rsa`, credential files) and asks for confirmation before sending anything or committing.
+- Lets you edit the suggested message, skip the push, or preview the message without committing.
+- Model is overridable per run with `--model`, or globally with the `KOMIT_MODEL` environment variable.
+- Written in standard Python (`urllib`, `subprocess`, `json`, `re`, `argparse`). Nothing to install beyond Python itself.
 
-No dependencies beyond the Python standard library: `urllib`, `subprocess`, `json`, `re`.
+Note: komit still runs `git add .` before you get a say in it. The secret check only catches common filename patterns, not everything, so keep your `.gitignore` in order regardless.
 
-Note: `git add .` stages everything in the working tree, including `.env` files or anything else not already covered by `.gitignore`. Check your `.gitignore` before running this.
-
-## Requirements
+## Prerequisites
 
 - Python 3.8+
 - Git
-- A free Groq API key: https://console.groq.com
+- A free [Groq API key](https://console.groq.com)
 
-## Install
+## Installation
 
-Copy `komit.py` into your local bin as `komit` (no extension):
+Copy `komit.py` to your local binary directory as `komit` (no extension, so it runs as a plain command):
 
 ```
 mkdir -p ~/.local/bin
@@ -32,7 +35,7 @@ Add `~/.local/bin` to your `PATH` if it isn't already, in `~/.bashrc` or `~/.zsh
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Set your Groq API key the same way:
+Export your Groq API key the same way:
 
 ```
 export GROQ_API_KEY="gsk_your_api_key_here"
@@ -40,12 +43,24 @@ export GROQ_API_KEY="gsk_your_api_key_here"
 
 ## Usage
 
-From inside any git repo:
+Run inside any Git repository:
 
 ```
 komit
 ```
 
-## Security note
+Flags:
 
-Commit messages go to git as an argument list (`subprocess.run([...])`), not interpolated into a shell string. Text from the model or from your own edits can't be read as shell commands.
+```
+komit --dry-run          # generate and show the message, commit nothing
+komit --no-push          # commit locally, skip the push
+komit --model <name>     # use a specific Groq model for this run
+```
+
+Set `KOMIT_MODEL` in your shell config to change the default model without passing `--model` every time.
+
+## Security
+
+Commit messages reach Git through an argument list (`subprocess.run([...])`), not a shell string, so text from the model can't be interpreted as a shell command.
+
+Before the diff is sent to Groq, komit checks the staged file names against a list of common secret patterns and asks before continuing if it finds a match. This catches obvious cases like a stray `.env` or `id_rsa`, not a full secret scanner. Your `.gitignore` is still the first line of defense.
